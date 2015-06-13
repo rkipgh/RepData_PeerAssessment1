@@ -1,9 +1,4 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 *June 2015*
@@ -33,7 +28,8 @@ This report examines "data from a personal activity monitoring device. This devi
 
 First, we need to read in our data.
 
-```{r}
+
+```r
 data = read.csv("activity.csv", header = TRUE)
 ```
 
@@ -42,21 +38,36 @@ data = read.csv("activity.csv", header = TRUE)
 
 Let's look at the distribution of how many total steps were taken each day during the two months for which we have data.
 
-```{r}
+
+```r
 stepsbydate = tapply(data$steps, data$date, sum, na.rm = TRUE)
 hist(stepsbydate, col = "gray", xlab = "Total number of steps taken each day", 
      main = "Frequency of number of steps taken each day")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
+
 As you can see, the participant most commonly walked between 10,000 and 15,000 steps per day.  The participant walked less than that range on many days, but walked more than that on relatively few days.
 
-On average (i.e, the arithmetic mean), the participant walked `r format(mean(stepsbydate), digits = 5)` steps per day.  The median number of steps that the participant walked per day was `r median(stepsbydate)`.
+On average (i.e, the arithmetic mean), the participant walked 9354.2 steps per day.  The median number of steps that the participant walked per day was 10395.
 
 *(Inline R code is used to calculate the mean and the median above, but it does not display -- and would interrupt the sentence if it did -- so it is reproduced below):*
 
-```{r}
+
+```r
 format(mean(stepsbydate), digits = 5)
+```
+
+```
+## [1] "9354.2"
+```
+
+```r
 median(stepsbydate)
+```
+
+```
+## [1] 10395
 ```
 
 
@@ -64,35 +75,49 @@ median(stepsbydate)
 
 To understand the participant's daily activity pattern, we can look at the average number of steps that the participant took during the course of the day.
 
-```{r}
+
+```r
 meansbyinterval = tapply(data$steps, data$interval, mean, na.rm = TRUE)
 plot(meansbyinterval ~ names(meansbyinterval), type = "l", data = data, 
      ylab = "Average number of steps", xlab = "Time of day (0 - 2400 hours)",
      main = "Average number of steps taken through the day")
 ```
 
-The participant on average walked very little from midnight (0 hours) to about 5:00 AM (500 hours).  Presumably, the participant was usually sleeping during that interval.  Shortly thereafter, the participant awoke and activity increased into a range of about 30 to 100 steps, where it remained on average through most of the remaining day.  The primary exception was when the step activity spiked and reached a maximum of about 200 steps at ```r names(meansbyinterval)[which.max(meansbyinterval)[[1]]]``` hours.  The activity begins tapering off shortly before 8:00 PM (2000 hours).
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
+
+The participant on average walked very little from midnight (0 hours) to about 5:00 AM (500 hours).  Presumably, the participant was usually sleeping during that interval.  Shortly thereafter, the participant awoke and activity increased into a range of about 30 to 100 steps, where it remained on average through most of the remaining day.  The primary exception was when the step activity spiked and reached a maximum of about 200 steps at ``835`` hours.  The activity begins tapering off shortly before 8:00 PM (2000 hours).
 
 *(Inline code is below.)*
 
-```{r}
+
+```r
 names(meansbyinterval)[which.max(meansbyinterval)[[1]]]
+```
+
+```
+## [1] "835"
 ```
 
 
 ## Imputing missing values
 
-As mentioned in the data description above (under the heading "Data"), there are 17,568 observations in this data set.  Out of these, ```r sum(is.na(data$steps))``` observations were missing (i.e., coded as 'NA' in the data set).
+As mentioned in the data description above (under the heading "Data"), there are 17,568 observations in this data set.  Out of these, ``2304`` observations were missing (i.e., coded as 'NA' in the data set).
 
 *(Inline code is below.)*
 
-```{r}
+
+```r
 sum(is.na(data$steps))
+```
+
+```
+## [1] 2304
 ```
 
 We can impute the missing data by substituting the average number of steps for the corresponding 5-minute time interval on all the other days with data available.  We can again look at the average number of steps that the participant took during the course of the day, but we'll use the imputed data this time.
 
-```{r}
+
+```r
 imputeddata = data
 naindices = which(is.na(imputeddata$steps))  # row indices with missing values
 meansbyintervalexpand = rep(as.vector(meansbyinterval), 
@@ -103,54 +128,96 @@ hist(stepsbydate2, col = "gray", xlab = "Total number of steps taken each day",
      main = "Frequency of number of steps taken each day")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-7-1.png) 
+
 And with the imputed data, we can again look at the mean and median number of steps taken by the participant.
 
 Mean
-```{r}
+
+```r
 mean(stepsbydate2)
 ```
 
+```
+## [1] 10766.19
+```
+
 Median
-```{r}
+
+```r
 median(stepsbydate2)
+```
+
+```
+## [1] 10766.19
 ```
 
 When we compare the histograms of the original data (with the missing data) and the imputed data, we can see that imputing the data has shifted many of the days with a low number of steps (0 - 5000 steps) into a more medium range of steps (10,000 - 15,000 steps), so that the peak of the histogram, which is in the medium range of steps, is much higher.  We might say that imputing the date had a "centralizing" effect on the data distribution, by pulling more of the data points (i.e., the number of steps per day) to the center of the distribution.
 
-This "centralizing" effect is also evident when we look at the mean and median number of steps taken by the participant.  In the original data, the mean `r format(mean(stepsbydate), digits = 5)` was less than the median `r format(median(stepsbydate), digits = 6)`, indicating a negative skew to the data distribution.  With the imputed data, the mean `r format(mean(stepsbydate2), digits = 6)` and the median `r format(median(stepsbydate2), digits = 6)` are equal, indicating that the distribution is not skewed overall.
+This "centralizing" effect is also evident when we look at the mean and median number of steps taken by the participant.  In the original data, the mean 9354.2 was less than the median 10395, indicating a negative skew to the data distribution.  With the imputed data, the mean 10766.2 and the median 10766.2 are equal, indicating that the distribution is not skewed overall.
 
-Imputing the data also increased the overall number of steps.  As mentioned above, many of the days with a low number of steps (0 - 5000 steps) shifted to a higher number of steps in the middle part of the distribution (10,000 - 15,000 steps).  We can also show this by calculating the total number of steps for the original (`r format(sum(stepsbydate), digits = 6)`) and the imputed data (`r format(sum(stepsbydate2), digits = 6)`); the latter is higher.
+Imputing the data also increased the overall number of steps.  As mentioned above, many of the days with a low number of steps (0 - 5000 steps) shifted to a higher number of steps in the middle part of the distribution (10,000 - 15,000 steps).  We can also show this by calculating the total number of steps for the original (570608) and the imputed data (656738); the latter is higher.
 
 *(Inline code is below.)*
 
 Mean number of steps per day for original data:
-```{r}
+
+```r
 format(mean(stepsbydate), digits = 5)
 ```
 
+```
+## [1] "9354.2"
+```
+
 Median number of steps per day for original data:
-```{r}
+
+```r
 format(median(stepsbydate), digits = 6)
 ```
 
+```
+## [1] "10395"
+```
+
 Mean number of steps per day for imputed data:
-```{r}
+
+```r
 format(mean(stepsbydate2), digits = 6)
 ```
 
+```
+## [1] "10766.2"
+```
+
 Median number of steps per day for imputed data:
-```{r}
+
+```r
 format(median(stepsbydate2), digits = 6)
 ```
 
+```
+## [1] "10766.2"
+```
+
 Total number of steps for original data:
-```{r}
+
+```r
 format(sum(stepsbydate), digits = 6)
 ```
 
+```
+## [1] "570608"
+```
+
 Total number of steps for imputed data:
-```{r}
+
+```r
 format(sum(stepsbydate2), digits = 6)
+```
+
+```
+## [1] "656738"
 ```
 
 
@@ -158,7 +225,8 @@ format(sum(stepsbydate2), digits = 6)
 
 Let's take a look at how the participant's activity patterns through the day may have differed between weekdays and weekends.
 
-```{r}
+
+```r
 days = weekdays(as.POSIXct(imputeddata$date))
 imputeddata[ , dim(imputeddata)[2] + 1] = ifelse(days == "Saturday" | days == "Sunday", 
                                              "weekend", "weekday")
@@ -174,12 +242,19 @@ plot(meansbyintervalweekday ~ imputeddata$interval[1:length(meansbyintervalweekd
      ylab = "Average number of steps", 
      xlab = "Time of day (0 - 2400 hours)",
      main = "Average number of steps taken on a weekday")
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-16-1.png) 
+
+```r
 plot(meansbyintervalweekend ~ imputeddata$interval[1:length(meansbyintervalweekday)], 
      type = "l", ylim = c(0, max(append(meansbyintervalweekday, meansbyintervalweekend))),
      ylab = "Average number of steps", 
      xlab = "Time of day (0 - 2400 hours)",
      main = "Average number of steps taken on a weekend day")
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-16-2.png) 
 
 When we compare the graphs for the participant's activity patterns on the weekdays (top) and the weekend (bottom), we can note several differences.  On weekdays, the participant's activity increases sharply shortly after 500 hours.  On the weekends, the participant's activity rises more gradually starting shortly after 500 hours.  The activity spikes to its highest point shortly before 1000 hours on both graphs, but the spike is higher on the weekdays than on the weekends.  During the remainder of the day, the weekend activity tends to be higher than activity on weekdays; this might be the result of the participant spending much of the weekdays at a relatively sedentary job.  The only remaining time of day when the participant's weekday activity appears to be higher than the corresponding weekend activity is at a modest spike shortly before 2000 hours, which might be part of the participant's commute home.  The participant's weekday activity tapers off earlier -- before 2000 hours -- than on the weekend, where the participant is still showing activity until well after 2000 hours.
 
